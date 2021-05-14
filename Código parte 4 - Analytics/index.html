@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+  	<meta charset="utf-8"/>
+    <title>P3 IRAC - Equipo 02</title>
+    <script src="https://reference.dashif.org/dash.js/latest/dist/dash.all.debug.js"></script>
+    <script>
+        let chart;
+        document.addEventListener("DOMContentLoaded", function () {
+          init();
+         });
+
+      function init(){
+       var video,
+             player,
+             mpd_url = "./output/stream.mpd";
+       video = document.querySelector("video");
+       player = dashjs.MediaPlayer().create();
+       player.initialize(video, mpd_url, true);
+       player.on(dashjs.MediaPlayer.events["PLAYBACK_ENDED"], function() {
+         clearInterval(eventPoller);
+       });
+       var eventPoller = setInterval(function() {
+         var streamInfo = player.getActiveStream().getStreamInfo();
+         var dashMetrics = player.getDashMetrics();
+         var dashAdapter = player.getDashAdapter();
+         if (dashMetrics && streamInfo) {
+           const periodIdx = streamInfo.index;
+           var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true);
+           var bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
+           var bitrate = repSwitch ? Math.round(dashAdapter.
+           getBandwidthForRepresentation(repSwitch.to,
+           periodIdx) / 1000) : NaN;
+           document.getElementById('buffer').innerText = bufferLevel;
+           document.getElementById('bitrate').innerText = bitrate;
+           document.getElementById('representation').innerText = repSwitch.to;
+           chart.data.labels.push(new Date().toLocaleTimeString());
+           chart.data.datasets[0].data.push(bufferLevel);
+           chart.data.datasets[1].data.push(bitrate);
+           chart.update();
+
+         }
+       }, 500);
+      }
+    </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@1.26.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0-beta.2"></script>
+
+
+  </head>
+  
+  
+  <body>
+     <div class="code">
+      <video class="dashjs-player" autoplay controls preload="auto" muted>
+      </video>
+      </div>
+      <div class="code">
+        <p>Video Bitrate: <span id="bitrate"></span> kbps</p>
+        <p>Video Buffer: <span id="buffer"></span> seconds</p>
+        <p>Video Representation: <span id="representation"></span></p>
+      </div>
+	  
+	  <div class="container">
+		<canvas id="myChart" width="400" height="400"></canvas>
+	  </div>
+
+	 <script>
+         var ctx = document.getElementById('myChart').getContext('2d');
+         chart = new Chart(ctx, {
+             type: 'line',
+             data: {
+                 labels: [],
+                 datasets: [{
+                     label: 'Buffer Ocuppation',
+                     borderColor: 'rgb(255, 99, 132)',
+                     backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                     borderDash: [8, 4],
+                     data: []
+                 }, {
+                     label: 'Bitrate',
+                     borderColor: 'rgb(54, 162, 235)',
+                     backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                     cubicInterpolationMode: 'monotone',
+                     data: []
+                 }]
+             },
+             options: {
+                 responsive: true,
+                 scales: {
+                     x: {
+                        display:true,
+                         type: 'realtime'
+                     }
+                 }
+             }
+         });
+		</script>
+	</body>
+</html>
