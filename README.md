@@ -2,7 +2,7 @@
 Repositorio del ***equipo 02*** de la Práctica 3 de IRAC
 
 ## Integrantes:
-Pablo Álvarez de Alba
-Ignacio del Cerro Domec
-Myriam Grandal Alonso
-Luis Casarrubios Élez
+[x]Pablo Álvarez de Alba
+[x]Ignacio del Cerro Domec
+[x]Myriam Grandal Alonso
+[x]Luis Casarrubios Élez
